@@ -5,7 +5,7 @@ const cors = require("cors");
 const RestaurantModel = require("./models/Restaurant");
 
 app.use(express.json());
-// app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 
 mongoose
@@ -52,19 +52,19 @@ app.post("/restaurants", async (req, res) => {
   }
 });
 
-// edit restaurant
-app.patch("/restaurant/:id", async (req, res) => {
-  try {
-    const id = req.params.id;
-    const restaurant = await RestaurantModel.findById({ _id: id });
-    if (!restaurant) {
-      return res.status(404).json({ message: "Restaurant not found" });
-    }
-    res.status(200).json(restaurant);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+// // edit restaurant
+// app.patch("/restaurants/:id", async (req, res) => {
+//   try {
+//     const id = req.params.id;
+//     const restaurant = await RestaurantModel.findById({ _id: id });
+//     if (!restaurant) {
+//       return res.status(404).json({ message: "Restaurant not found" });
+//     }
+//     res.status(200).json(restaurant);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// });
 
 // update a restaurant
 // app.put("/updateRestaurant/:id", async (req, res) => {
@@ -80,13 +80,13 @@ app.patch("/restaurant/:id", async (req, res) => {
 //     res.status(500).json({ message: error.message });
 //   }
 // });
-app.get('/editRestaurant/:id', (req, res) => {
+app.get('/edit/:id', (req, res) => {
   const id = req.params.id
   RestaurantModel.findById({_id: id})
     .then((restaurant) => res.json(restaurant))
     .catch((err) => res.json(err));
 })
-app.put('/updateRestaurant/:id',  (req, res) => {
+app.put('/restaurants/:id',  (req, res) => {
   // try {
     const id = req.params.id;
     RestaurantModel.findByIdAndUpdate({ _id: id }, req.body)
@@ -98,7 +98,7 @@ app.put('/updateRestaurant/:id',  (req, res) => {
 })
 
 // delete restaurant
-app.delete("/restaurant/:id", async (req, res) => {
+app.delete("/restaurants/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const restaurant = await RestaurantModel.findByIdAndDelete({ _id: id });
