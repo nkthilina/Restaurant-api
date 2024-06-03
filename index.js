@@ -1,3 +1,6 @@
+// Load environment variables from .env file
+require('dotenv').config();
+
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
@@ -8,18 +11,33 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 
-mongoose
-  .connect("mongodb://127.0.0.1:27017/HyperByte_Careers-Test-DB")
-  .then(() => console.log("Database Connected!"))
-  .catch((err) => console.error(err));
+// Use the environment variables
+const port = process.env.PORT || 3000;
+const databaseUrl = process.env.DATABASE_URL;
+const secretKey = process.env.SECRET_KEY;
+const apiKey = process.env.API_KEY;
 
-app.get("/", (req, res) => {
-  res.send("Hello World Test!");
+mongoose
+  // .connect(databaseUrl, {useNewUrlParser: true, useUnifiedTopology: true})
+  // .connect("mongodb://127.0.0.1:27017/HyperByte_Careers-Test-DB")
+  .connect(databaseUrl)
+  .then(() => console.log("Database Connected!"))
+  .catch((err) => console.error('Database connection error', err));
+
+// testing the connection
+// app.get("/", (req, res) => {
+//   res.send("Hello World Test!");
+// });
+
+app.get('/', (req, res) => {
+  res.send(`Your API key is ${apiKey}`);
 });
 
 app.get("/api/", (req, res) => {
   res.send("New test API");
 });
+// end testing the connection
+
 
 // show all restaurants
 app.get("/restaurants", async(req, res) => {
@@ -52,50 +70,33 @@ app.post("/restaurants", async (req, res) => {
   }
 });
 
-// // edit restaurant
-// app.patch("/restaurants/:id", async (req, res) => {
-//   try {
-//     const id = req.params.id;
-//     const restaurant = await RestaurantModel.findById({ _id: id });
-//     if (!restaurant) {
-//       return res.status(404).json({ message: "Restaurant not found" });
-//     }
-//     res.status(200).json(restaurant);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// });
+// edit restaurant details
+app.get('/edit/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const restaurant = await RestaurantModel.findById({ _id: id });
+    if (!restaurant) {
+      return res.status(404).json({ message: "Restaurant not found" });
+    }
+    res.status(200).json(restaurant);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
-// update a restaurant
-// app.put("/updateRestaurant/:id", async (req, res) => {
-//   try {
-//     const id = req.params.id;
-//     const restaurant = await RestaurantModel.findByIdAndUpdate({ _id: id }, req.body, { new: true });
-//     if (!restaurant) {
-//       return res.status(404).json({ message: "Restaurant not found" });
-//     }
-//     const updatedRestaurant = await RestaurantModel.findById({ _id: id });
-//     res.status(200).json(updatedRestaurant);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// });
-app.get('/edit/:id', (req, res) => {
-  const id = req.params.id
-  RestaurantModel.findById({_id: id})
-    .then((restaurant) => res.json(restaurant))
-    .catch((err) => res.json(err));
-})
-app.put('/restaurants/:id',  (req, res) => {
-  // try {
+// update restaurant details
+app.put('/restaurants/:id', async (req, res) => {
+  try {
     const id = req.params.id;
-    RestaurantModel.findByIdAndUpdate({ _id: id }, req.body)
-    .then((updatedRestaurant) => res.json(updatedRestaurant))
-    .catch((err) => res.json(err));
-  // } catch (error) {
-  //   res.status(500).json({ message: error.message });
-  // }
-})
+    const updatedRestaurant = await RestaurantModel.findByIdAndUpdate({ _id: id }, req.body, { new: true });
+    if (!updatedRestaurant) {
+      return res.status(404).json({ message: "Restaurant not found" });
+    }
+    res.status(200).json(updatedRestaurant);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 // delete restaurant
 app.delete("/restaurants/:id", async (req, res) => {
@@ -111,7 +112,6 @@ app.delete("/restaurants/:id", async (req, res) => {
   }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}`);
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
 });
